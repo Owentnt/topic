@@ -31,19 +31,24 @@ interface Country {
 interface ModalProps {
     country: Country;
     onClose: () => void;
+    onVisit: (country: Country) => void;
+    onWish: (country: Country) => void;
+    isVisited: boolean;
+    isWishlisted: boolean;
 }
 
-const Modal: FC<ModalProps> = ({ country, onClose }) => {
-
-
-
+const Modal: FC<ModalProps> = ({ country, onClose, onVisit, onWish, isVisited, isWishlisted }) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[9999]">
             <div className="bg-white rounded-2xl shadow-xl p-6 max-w-xl w-full relative max-h-[80vh] z-[99999]">
+                {/* Close button */}
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition">
                     <X size={20} />
                 </button>
+
+                {/* Modal content */}
                 <div className="modal-content max-h-[75vh] overflow-y-auto p-2">
+                    {/* Country name and flag */}
                     <div className="flex items-center justify-center gap-3 mb-4">
                         <h2 className="text-2xl font-bold flex items-center">
                             {country.name}
@@ -51,6 +56,7 @@ const Modal: FC<ModalProps> = ({ country, onClose }) => {
                         </h2>
                     </div>
 
+                    {/* Country details */}
                     <div className="space-y-2 text-gray-700">
                         <p><strong>Capital:</strong> {country.capital}</p>
                         <p><strong>Region:</strong> {country.region}</p>
@@ -63,6 +69,22 @@ const Modal: FC<ModalProps> = ({ country, onClose }) => {
                         <p><strong>Calling Code:</strong> {country.callingCode}</p>
                         <p>{country.dangerExplanation}</p>
                     </div>
+
+                    {/* Wishlist and Visited buttons */}
+                    <div className="flex gap-4 mt-4">
+                        <button
+                            onClick={() => onVisit(country)}
+                            className={`px-4 py-2 rounded ${isVisited ? "bg-green-500 text-white" : "bg-gray-300 text-gray-700"}`}
+                        >
+                            {isVisited ? "Visited" : "Mark as Visited"}
+                        </button>
+                        <button
+                            onClick={() => onWish(country)}
+                            className={`px-4 py-2 rounded ${isWishlisted ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-700"}`}
+                        >
+                            {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -71,7 +93,9 @@ const Modal: FC<ModalProps> = ({ country, onClose }) => {
 
 export default function Home() {
     const [geoJsonData, setGeoJsonData] = useState(null);
-    const [selectedCountry, setSelectedCountry] = useState<Country | null>(null); // State for the selected country
+    const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+    const [visitedCountries, setVisitedCountries] = useState<Set<string>>(new Set());
+    const [wishlistCountries, setWishlistCountries] = useState<Set<string>>(new Set());
 
     // Fetch GeoJSON data
     useEffect(() => {
@@ -81,6 +105,45 @@ export default function Home() {
                 .then((data) => setGeoJsonData(data));
         }
     }, []);
+
+    // Handle marking a country as visited
+    const handleVisit = (country: Country) => {
+        setVisitedCountries((prev) => {
+            const updated = new Set(prev);
+            if (updated.has(country.name)) {
+                updated.delete(country.name); // Toggle off
+            } else {
+                updated.add(country.name); // Toggle on
+                wishlistCountries.delete(country.name); // Remove from wishlist
+            }
+            return updated;
+        });
+    };
+
+    // Handle adding a country to the wishlist
+    const handleWish = (country: Country) => {
+        setWishlistCountries((prev) => {
+            const updated = new Set(prev);
+            if (updated.has(country.name)) {
+                updated.delete(country.name); // Toggle off
+            } else {
+                updated.add(country.name); // Toggle on
+                visitedCountries.delete(country.name); // Remove from visited
+            }
+            return updated;
+        });
+    };
+
+    // Get the color for a country based on its state
+    const getCountryColor = (countryName: string) => {
+        if (visitedCountries.has(countryName)) {
+            return "pink"; // Visited countries are pink
+        } else if (wishlistCountries.has(countryName)) {
+            return "blue"; // Wishlisted countries are blue
+        } else {
+            return "#DDD"; // Default color
+        }
+    };
 
     const center: LatLngExpression = [20, 0];
 
@@ -96,15 +159,19 @@ export default function Home() {
                     {geoJsonData && (
                         <GeoJSON
                             data={geoJsonData}
-                            style={() => {
+                            style={(feature) => {
+                                if (!feature) return {}; // Add a type guard to handle undefined feature
+                                const countryName = feature.properties.name;
+                                const fillColor = getCountryColor(countryName);
                                 return {
-                                    fillColor: "#DDD",
+                                    fillColor: fillColor,
                                     weight: 1,
                                     opacity: 0.7,
                                     fillOpacity: 0.6,
                                 };
                             }}
                             onEachFeature={(feature, layer) => {
+                                if (!feature) return; // Add a type guard to handle undefined feature
                                 const countryName = feature.properties.name;
                                 const country = countryData.find((c) => c.name === countryName);
 
@@ -112,9 +179,9 @@ export default function Home() {
                                 if (country) {
                                     layer.bindTooltip(
                                         `<div class="flex items-center gap-2">
-                                            <Image src="${country.flag}" alt="${country.name}" class="w-6 h-4" />
-                                            <span>${country.name}</span>
-                                        </div>`,
+                    <img src="${country.flag}" alt="${country.name}" class="w-6 h-4" />
+                    <span>${country.name}</span>
+                </div>`,
                                         { permanent: false, direction: "auto" }
                                     );
                                 } else {
@@ -133,10 +200,15 @@ export default function Home() {
                 </MapContainer>
             )}
 
+            {/* Render the modal if a country is selected */}
             {selectedCountry && (
                 <Modal
                     country={selectedCountry}
-                    onClose={() => setSelectedCountry(null)} // Close the modal
+                    onClose={() => setSelectedCountry(null)}
+                    onVisit={handleVisit}
+                    onWish={handleWish}
+                    isVisited={visitedCountries.has(selectedCountry.name)}
+                    isWishlisted={wishlistCountries.has(selectedCountry.name)}
                 />
             )}
         </div>
