@@ -26,6 +26,7 @@ interface Country {
     gdp: number;
     callingCode: string;
     dangerExplanation: string;
+    safetyStatus: string; // Add safetyStatus to the Country interface
 }
 
 interface ModalProps {
@@ -91,11 +92,57 @@ const Modal: FC<ModalProps> = ({ country, onClose, onVisit, onWish, isVisited, i
     );
 };
 
+// Safety Legend Component
+const SafetyLegend = ({ showSafetyColors }: { showSafetyColors: boolean }) => {
+    return (
+        <div className="absolute top-4 left-4 bg-white p-4 rounded-lg shadow-lg z-[9999]">
+            <h3 className="font-bold mb-2">{showSafetyColors ? "Safety Status" : "Default Colors"}</h3>
+            {showSafetyColors ? (
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                        <span>Safe</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                        <span>Moderate</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                        <span>Risky</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                        <span>Dangerous</span>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-pink-500 rounded-full"></div>
+                        <span>Visited</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                        <span>Wishlisted</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+                        <span>Default</span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function Home() {
     const [geoJsonData, setGeoJsonData] = useState(null);
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
     const [visitedCountries, setVisitedCountries] = useState<Set<string>>(new Set());
     const [wishlistCountries, setWishlistCountries] = useState<Set<string>>(new Set());
+    const [showLegend, setShowLegend] = useState(true); // State to toggle legend visibility
+    const [showSafetyColors, setShowSafetyColors] = useState(false); // State to toggle safety colors
 
     // Fetch GeoJSON data
     useEffect(() => {
@@ -136,12 +183,32 @@ export default function Home() {
 
     // Get the color for a country based on its state
     const getCountryColor = (countryName: string) => {
-        if (visitedCountries.has(countryName)) {
-            return "pink"; // Visited countries are pink
-        } else if (wishlistCountries.has(countryName)) {
-            return "blue"; // Wishlisted countries are blue
+        const country = countryData.find((c) => c.name === countryName);
+        if (!country) return "#DDD"; // Default color if country not found
+
+        if (showSafetyColors) {
+            // Use safety status color
+            switch (country.safetyStatus) {
+                case "green":
+                    return "#4CAF50"; // Green for safe
+                case "yellow":
+                    return "#FFEB3B"; // Yellow for moderate
+                case "orange":
+                    return "#FF9800"; // Orange for risky
+                case "red":
+                    return "#F44336"; // Red for dangerous
+                default:
+                    return "#DDD"; // Default gray
+            }
         } else {
-            return "#DDD"; // Default color
+            // Use default colors (visited/wishlisted)
+            if (visitedCountries.has(countryName)) {
+                return "pink"; // Visited countries are pink
+            } else if (wishlistCountries.has(countryName)) {
+                return "blue"; // Wishlisted countries are blue
+            } else {
+                return "#DDD"; // Default gray
+            }
         }
     };
 
@@ -179,9 +246,9 @@ export default function Home() {
                                 if (country) {
                                     layer.bindTooltip(
                                         `<div class="flex items-center gap-2">
-                    <img src="${country.flag}" alt="${country.name}" class="w-6 h-4" />
-                    <span>${country.name}</span>
-                </div>`,
+                                            <img src="${country.flag}" alt="${country.name}" class="w-6 h-4" />
+                                            <span>${country.name}</span>
+                                        </div>`,
                                         { permanent: false, direction: "auto" }
                                     );
                                 } else {
@@ -197,6 +264,25 @@ export default function Home() {
                             }}
                         />
                     )}
+
+                    {/* Toggle Legend Button */}
+                    <button
+                        onClick={() => setShowLegend(!showLegend)}
+                        className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[9999]"
+                    >
+                        {showLegend ? "Hide Legend" : "Show Legend"}
+                    </button>
+
+                    {/* Toggle Safety Colors Button */}
+                    <button
+                        onClick={() => setShowSafetyColors(!showSafetyColors)}
+                        className="absolute top-16 right-4 bg-white p-2 rounded-lg shadow-lg z-[9999]"
+                    >
+                        {showSafetyColors ? "Show Default Colors" : "Show Safety Colors"}
+                    </button>
+
+                    {/* Render the Safety Legend if showLegend is true */}
+                    {showLegend && <SafetyLegend showSafetyColors={showSafetyColors} />}
                 </MapContainer>
             )}
 
