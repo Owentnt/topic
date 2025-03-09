@@ -26,7 +26,7 @@ interface Country {
     gdp: number;
     callingCode: string;
     dangerExplanation: string;
-    safetyStatus: string; // Add safetyStatus to the Country interface
+    safetyStatus: string;
 }
 
 interface ModalProps {
@@ -144,7 +144,6 @@ export default function Home() {
     const [showLegend, setShowLegend] = useState(true); // State to toggle legend visibility
     const [showSafetyColors, setShowSafetyColors] = useState(false); // State to toggle safety colors
 
-    // Fetch GeoJSON data
     useEffect(() => {
         if (typeof window !== "undefined") {
             fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
@@ -153,61 +152,56 @@ export default function Home() {
         }
     }, []);
 
-    // Handle marking a country as visited
     const handleVisit = (country: Country) => {
         setVisitedCountries((prev) => {
             const updated = new Set(prev);
             if (updated.has(country.name)) {
-                updated.delete(country.name); // Toggle off
+                updated.delete(country.name);
             } else {
-                updated.add(country.name); // Toggle on
-                wishlistCountries.delete(country.name); // Remove from wishlist
+                updated.add(country.name);
+                wishlistCountries.delete(country.name);
             }
             return updated;
         });
     };
 
-    // Handle adding a country to the wishlist
     const handleWish = (country: Country) => {
         setWishlistCountries((prev) => {
             const updated = new Set(prev);
             if (updated.has(country.name)) {
-                updated.delete(country.name); // Toggle off
+                updated.delete(country.name);
             } else {
-                updated.add(country.name); // Toggle on
-                visitedCountries.delete(country.name); // Remove from visited
+                updated.add(country.name);
+                visitedCountries.delete(country.name);
             }
             return updated;
         });
     };
 
-    // Get the color for a country based on its state
     const getCountryColor = (countryName: string) => {
         const country = countryData.find((c) => c.name === countryName);
-        if (!country) return "#DDD"; // Default color if country not found
+        if (!country) return "#DDD";
 
         if (showSafetyColors) {
-            // Use safety status color
             switch (country.safetyStatus) {
                 case "green":
-                    return "#4CAF50"; // Green for safe
+                    return "#4CAF50";
                 case "yellow":
-                    return "#FFEB3B"; // Yellow for moderate
+                    return "#FFEB3B";
                 case "orange":
-                    return "#FF9800"; // Orange for risky
+                    return "#FF9800";
                 case "red":
-                    return "#F44336"; // Red for dangerous
+                    return "#F44336";
                 default:
-                    return "#DDD"; // Default gray
+                    return "#DDD";
             }
         } else {
-            // Use default colors (visited/wishlisted)
             if (visitedCountries.has(countryName)) {
-                return "pink"; // Visited countries are pink
+                return "pink";
             } else if (wishlistCountries.has(countryName)) {
-                return "blue"; // Wishlisted countries are blue
+                return "blue";
             } else {
-                return "#DDD"; // Default gray
+                return "#DDD";
             }
         }
     };
@@ -222,12 +216,11 @@ export default function Home() {
                         url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
                     />
 
-                    {/* Render GeoJSON data */}
                     {geoJsonData && (
                         <GeoJSON
                             data={geoJsonData}
                             style={(feature) => {
-                                if (!feature) return {}; // Add a type guard to handle undefined feature
+                                if (!feature) return {};
                                 const countryName = feature.properties.name;
                                 const fillColor = getCountryColor(countryName);
                                 return {
@@ -238,11 +231,10 @@ export default function Home() {
                                 };
                             }}
                             onEachFeature={(feature, layer) => {
-                                if (!feature) return; // Add a type guard to handle undefined feature
+                                if (!feature) return;
                                 const countryName = feature.properties.name;
                                 const country = countryData.find((c) => c.name === countryName);
 
-                                // Bind tooltip with country name and flag
                                 if (country) {
                                     layer.bindTooltip(
                                         `<div class="flex items-center gap-2">
@@ -255,7 +247,6 @@ export default function Home() {
                                     layer.bindTooltip(countryName, { permanent: false, direction: "auto" });
                                 }
 
-                                // Open modal when a country is clicked
                                 layer.on("click", () => {
                                     if (country) {
                                         setSelectedCountry(country);
@@ -265,7 +256,6 @@ export default function Home() {
                         />
                     )}
 
-                    {/* Toggle Legend Button */}
                     <button
                         onClick={() => setShowLegend(!showLegend)}
                         className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[9999]"
@@ -273,7 +263,6 @@ export default function Home() {
                         {showLegend ? "Hide Legend" : "Show Legend"}
                     </button>
 
-                    {/* Toggle Safety Colors Button */}
                     <button
                         onClick={() => setShowSafetyColors(!showSafetyColors)}
                         className="absolute top-16 right-4 bg-white p-2 rounded-lg shadow-lg z-[9999]"
@@ -281,12 +270,10 @@ export default function Home() {
                         {showSafetyColors ? "Show Default Colors" : "Show Safety Colors"}
                     </button>
 
-                    {/* Render the Safety Legend if showLegend is true */}
                     {showLegend && <SafetyLegend showSafetyColors={showSafetyColors} />}
                 </MapContainer>
             )}
 
-            {/* Render the modal if a country is selected */}
             {selectedCountry && (
                 <Modal
                     country={selectedCountry}
