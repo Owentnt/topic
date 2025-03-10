@@ -47,9 +47,7 @@ const Modal: FC<ModalProps> = ({ country, onClose, onVisit, onWish, isVisited, i
                     <X size={20} />
                 </button>
 
-                {/* Modal content */}
                 <div className="modal-content max-h-[75vh] overflow-y-auto p-2">
-                    {/* Country name and flag */}
                     <div className="flex items-center justify-center gap-3 mb-4">
                         <h2 className="text-2xl font-bold flex items-center">
                             {country.name}
@@ -57,7 +55,6 @@ const Modal: FC<ModalProps> = ({ country, onClose, onVisit, onWish, isVisited, i
                         </h2>
                     </div>
 
-                    {/* Country details */}
                     <div className="space-y-2 text-gray-700">
                         <p><strong>Capital:</strong> {country.capital}</p>
                         <p><strong>Region:</strong> {country.region}</p>
@@ -71,7 +68,6 @@ const Modal: FC<ModalProps> = ({ country, onClose, onVisit, onWish, isVisited, i
                         <p>{country.dangerExplanation}</p>
                     </div>
 
-                    {/* Wishlist and Visited buttons */}
                     <div className="flex gap-4 mt-4">
                         <button
                             onClick={() => onVisit(country)}
@@ -92,7 +88,6 @@ const Modal: FC<ModalProps> = ({ country, onClose, onVisit, onWish, isVisited, i
     );
 };
 
-// Safety Legend Component
 const SafetyLegend = ({ showSafetyColors }: { showSafetyColors: boolean }) => {
     return (
         <div className="absolute top-4 left-4 bg-white p-4 rounded-lg shadow-lg z-[9999]">
