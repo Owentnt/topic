@@ -207,7 +207,7 @@ export default function Home() {
             {typeof window !== "undefined" && (
                 <MapContainer center={center} zoom={2} style={{ height: "600px", width: "100%" }} className="z-[10]">
                     <TileLayer
-                        url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
+                        url={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
                     />
 
                     {geoJsonData && (
@@ -281,3 +281,4 @@ export default function Home() {
         </div>
     );
 }
+
