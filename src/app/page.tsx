@@ -42,7 +42,6 @@ const Modal: FC<ModalProps> = ({ country, onClose, onVisit, onWish, isVisited, i
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[9999]">
             <div className="bg-white rounded-2xl shadow-xl p-6 max-w-xl w-full relative max-h-[80vh] z-[99999]">
-                {/* Close button */}
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition">
                     <X size={20} />
                 </button>
