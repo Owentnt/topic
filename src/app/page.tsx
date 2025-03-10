@@ -135,8 +135,8 @@ export default function Home() {
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
     const [visitedCountries, setVisitedCountries] = useState<Set<string>>(new Set());
     const [wishlistCountries, setWishlistCountries] = useState<Set<string>>(new Set());
-    const [showLegend, setShowLegend] = useState(true); // State to toggle legend visibility
-    const [showSafetyColors, setShowSafetyColors] = useState(false); // State to toggle safety colors
+    const [showLegend, setShowLegend] = useState(true);
+    const [showSafetyColors, setShowSafetyColors] = useState(false);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
