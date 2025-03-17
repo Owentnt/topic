@@ -8,3 +8,4 @@ First, install Mapbox GL in your project using the following command in your ter
 
 ```bash
 npm install mapbox-gl
+

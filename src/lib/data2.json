@@ -1,0 +1,19 @@
+{
+  "todos": [
+    {
+      "id": "1e7b1d2e-3b4a-4b5c-8a1e-1f2d3c4b5a6e",
+      "title": "Buy groceries",
+      "completed": false
+    },
+    {
+      "id": "2e7b1d2e-3b4a-4b5c-8a1e-1f2d3c4b5a6e",
+      "title": "Read a book",
+      "completed": true
+    },
+    {
+      "id": "3e7b1d2e-3b4a-4b5c-8a1e-1f2d3c4b5a6e",
+      "title": "Write code",
+      "completed": false
+    }
+  ]
+}
